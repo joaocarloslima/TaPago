@@ -2,6 +2,7 @@ package br.com.fiap.tapago.controller;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -46,71 +48,35 @@ public class CategoriaController {
         log.info("buscando categoria com id {}", id);
 
         return repository
-            .findById(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+                .findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
 
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Object> destroy(@PathVariable Long id) {
+    @ResponseStatus(NO_CONTENT)
+    public void destroy(@PathVariable Long id) {
         log.info("apagando categoria {}", id);
-
-        repository
-            .findById(id)
-            .orElseThrow(() -> new ResponseStatusException(
-                                        NOT_FOUND, 
-                                        "Não existe categoria com o id informado"
-                                    ));
-
+        verificarSeCategoriaExiste(id);
         repository.deleteById(id);
-        return ResponseEntity.noContent().build();
-
-        // var categoriaEncontrada = repository.findById(id);
-
-        // if (categoriaEncontrada.isEmpty())
-        //     return ResponseEntity.notFound().build();
-
-        // repository.delete(categoriaEncontrada.get());
-
-        // return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("{id}")
+    public Categoria update(@PathVariable Long id, @RequestBody Categoria categoria) {
+        log.info("atualizar categoria {} para {}", id, categoria);
 
-    // @PutMapping("{id}")
-    // public ResponseEntity<Categoria> update(@PathVariable Long id, @RequestBody Categoria categoria){
-    //     log.info("atualizar categoria {} para {}", id, categoria);
+        verificarSeCategoriaExiste(id);
+        categoria.setId(id);
+        return repository.save(categoria);
+    }
 
-    //     // buscar a categoria antiga -> 404
-    //     var categoriaEncontrada = getCategoriaById(id);
-
-    //     if (categoriaEncontrada.isEmpty())
-    //         return ResponseEntity.notFound().build();
-
-    //     var categoriaAntiga = categoriaEncontrada.get();
-
-    //     // criar a categoria nova com os dados atualizados
-    //     var categoriaNova = new Categoria(id, categoria.nome(), categoria.icone());
-
-    //     // apagar a categoria antiga
-    //     repository.remove(categoriaAntiga);
-
-    //     // add a categoria nova
-    //     repository.add(categoriaNova);
-
-    //     return ResponseEntity.ok(categoriaNova);
-    // }
-
-
-
-
-
-    // private Optional<Categoria> getCategoriaById(Long id) {
-    //     var categoriaEncontrada = repository
-    //             .stream()
-    //             .filter(c -> c.id().equals(id))
-    //             .findFirst();
-    //     return categoriaEncontrada;
-    // }
+    private void verificarSeCategoriaExiste(Long id) {
+        repository
+                .findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        NOT_FOUND,
+                        "Não existe categoria com o id informado"));
+    }
 
 }
