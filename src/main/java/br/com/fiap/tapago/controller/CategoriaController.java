@@ -1,35 +1,30 @@
 package br.com.fiap.tapago.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import br.com.fiap.tapago.model.Categoria;
 import br.com.fiap.tapago.repository.CategoriaRepository;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("categoria")
+@Slf4j
 public class CategoriaController {
-
-    Logger log = LoggerFactory.getLogger(getClass());
 
     @Autowired // Injeção de Dependência - Inversão de Controle
     CategoriaRepository repository;
@@ -40,7 +35,7 @@ public class CategoriaController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(CREATED)
     public Categoria create(@RequestBody Categoria categoria) {
         log.info("Cadastrando categoria {}", categoria);
         return repository.save(categoria);
@@ -57,19 +52,29 @@ public class CategoriaController {
 
     }
 
-    // @DeleteMapping("{id}")
-    // public ResponseEntity<Object> destroy(@PathVariable Long id) {
-    //     log.info("apagando categoria {}", id);
+    @DeleteMapping("{id}")
+    public ResponseEntity<Object> destroy(@PathVariable Long id) {
+        log.info("apagando categoria {}", id);
 
-    //     var categoriaEncontrada = getCategoriaById(id);
+        repository
+            .findById(id)
+            .orElseThrow(() -> new ResponseStatusException(
+                                        NOT_FOUND, 
+                                        "Não existe categoria com o id informado"
+                                    ));
 
-    //     if (categoriaEncontrada.isEmpty())
-    //         return ResponseEntity.notFound().build();
+        repository.deleteById(id);
+        return ResponseEntity.noContent().build();
 
-    //     repository.remove(categoriaEncontrada.get());
+        // var categoriaEncontrada = repository.findById(id);
 
-    //     return ResponseEntity.noContent().build();
-    // }
+        // if (categoriaEncontrada.isEmpty())
+        //     return ResponseEntity.notFound().build();
+
+        // repository.delete(categoriaEncontrada.get());
+
+        // return ResponseEntity.noContent().build();
+    }
 
 
     // @PutMapping("{id}")
