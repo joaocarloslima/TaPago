@@ -21,6 +21,8 @@ public interface MovimentacaoRepository extends JpaRepository<Movimentacao, Long
     @Query("SELECT m FROM Movimentacao m WHERE MONTH(m.data) = :mes AND m.categoria.nome = :categoria")
     Page<Movimentacao> findByCategoriaNomeAndMes(@Param("categoria") String categoria, @Param("mes")  Integer mes, Pageable pageable);
 
+    Movimentacao findFirstByOrderByValor();
+
 
 
     
