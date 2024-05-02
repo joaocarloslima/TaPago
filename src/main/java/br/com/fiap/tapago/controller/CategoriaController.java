@@ -7,6 +7,9 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,18 +30,21 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("categoria")
 @Slf4j
+@CacheConfig(cacheNames = "categorias")
 public class CategoriaController {
 
     @Autowired // Injeção de Dependência - Inversão de Controle
     CategoriaRepository repository;
 
     @GetMapping
+    @Cacheable
     public List<Categoria> index() {
         return repository.findAll();
     }
 
     @PostMapping
     @ResponseStatus(CREATED)
+    @CacheEvict(allEntries = true)
     public Categoria create(@RequestBody @Valid Categoria categoria) {
         log.info("Cadastrando categoria {}", categoria);
         return repository.save(categoria);
@@ -57,13 +63,15 @@ public class CategoriaController {
 
     @DeleteMapping("{id}")
     @ResponseStatus(NO_CONTENT)
+    @CacheEvict(allEntries = true)
     public void destroy(@PathVariable Long id) {
         log.info("apagando categoria {}", id);
         verificarSeCategoriaExiste(id);
         repository.deleteById(id);
     }
-
+    
     @PutMapping("{id}")
+    @CacheEvict(allEntries = true)
     public Categoria update(@PathVariable Long id, @RequestBody Categoria categoria) {
         log.info("atualizar categoria {} para {}", id, categoria);
 
