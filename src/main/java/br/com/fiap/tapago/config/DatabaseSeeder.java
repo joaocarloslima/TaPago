@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import br.com.fiap.tapago.model.Categoria;
 import br.com.fiap.tapago.model.Movimentacao;
@@ -14,6 +15,7 @@ import br.com.fiap.tapago.repository.CategoriaRepository;
 import br.com.fiap.tapago.repository.MovimentacaoRepository;
 
 @Configuration
+@Profile("dev")
 public class DatabaseSeeder implements CommandLineRunner{
 
     @Autowired
